@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美國 AI 資金流動與系統性風險地圖 / US AI Capital Flow & Systemic Risk Map</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<style>
+  :root {
+    --bg: #0e1117; --panel: #161b24; --panel2: #1d2430; --border: #2a3344;
+    --text: #e6e9ef; --muted: #8b94a7; --accent: #e8554e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Noto Sans TC", "PingFang TC", system-ui, sans-serif; overflow: hidden; }
+  header { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header .sub { font-size: 12px; color: var(--muted); }
+  .status-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #4a3320; color: #f0b35c; border: 1px solid #6b4a26; }
+  nav { display: flex; gap: 4px; padding: 8px 20px; border-bottom: 1px solid var(--border); }
+  nav button { background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  nav button.active { background: var(--panel2); color: var(--text); border-color: var(--accent); }
+  nav button:hover { color: var(--text); }
+  #main { display: flex; height: calc(100vh - 105px); }
+  #viz { flex: 1; position: relative; }
+  #viz svg { width: 100%; height: 100%; display: block; }
+  #sidebar { width: 340px; border-left: 1px solid var(--border); background: var(--panel); padding: 14px; overflow-y: auto; font-size: 13px; }
+  #sidebar h2 { font-size: 14px; margin-bottom: 8px; }
+  #sidebar .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); background: var(--panel2); padding: 2px 8px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; }
+  .legend span.dim { opacity: 0.35; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .card { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .card .name { font-weight: 700; font-size: 15px; }
+  .card .cat { font-size: 11px; color: var(--muted); }
+  .health-bar { height: 7px; border-radius: 4px; background: #2a3344; margin: 8px 0 4px; overflow: hidden; }
+  .health-bar i { display: block; height: 100%; border-radius: 4px; }
+  .flow-row { padding: 6px 0; border-top: 1px dashed var(--border); font-size: 12px; line-height: 1.5; }
+  .flow-row .amt { font-weight: 700; }
+  .conf { font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 5px; }
+  .conf.confirmed { background: #1d3a2a; color: #5fd48a; }
+  .conf.reported  { background: #3a341d; color: #d4c25f; }
+  .conf.estimate  { background: #3a1d1d; color: #d45f5f; }
+  .cite { color: var(--muted); font-size: 10.5px; margin-top: 2px; }
+  table.health { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.health th, table.health td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  table.health th { color: var(--muted); font-weight: 500; font-size: 11px; cursor: pointer; }
+  #healthView { padding: 20px; overflow-y: auto; height: 100%; display: none; }
+  .contagion-controls { padding: 10px 0; }
+  .contagion-controls select, .contagion-controls button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: inherit; font-size: 13px; }
+  .pulse { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.35; } }
+  .tooltip { position: absolute; pointer-events: none; background: #000c; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 12px; max-width: 280px; line-height: 1.5; display: none; z-index: 10; }
+</style>
+</head>
+<body>
+<header>
+  <h1>美國 AI 資金流動與系統性風險地圖</h1>
+  <span class="sub">US AI Capital Flow & Systemic Risk Map</span>
+  <span class="status-badge" id="statusBadge"></span>
+</header>
+<nav>
+  <button data-view="network" class="active">網絡圖 Network</button>
+  <button data-view="sankey">資金流 Sankey</button>
+  <button data-view="health">健康度 Health</button>
+  <button data-view="contagion">傳染模擬 Contagion</button>
+  <button data-view="leverage">槓桿 Leverage</button>
+  <button onclick="window.open('report.html','_blank')" style="margin-left:auto">📄 完整報告 Full Report</button>
+</nav>
+<div id="main">
+  <div id="viz">
+    <svg id="svg"></svg>
+    <div id="healthView"></div>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+  <div id="sidebar">
+    <h2>圖例 / Legend</h2>
+    <div class="legend" id="legend"></div>
+    <div id="detail">
+      <p class="hint">點擊節點查看公司資產負債摘要與所有資金流。<br>Click a node to see balance-sheet summary and all flows.<br><br>線條粗細 = 金額；虛線樣式 = 流向類型（債務/租賃/採購承諾…）。<br>Edge width = amount; dash style = flow type.</p>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const svg = d3.select("#svg");
+const tooltip = d3.select("#tooltip");
+const W = () => document.getElementById("viz").clientWidth;
+const H = () => document.getElementById("viz").clientHeight;
+let currentView = "network";
+let hiddenCats = new Set();
+
+document.getElementById("statusBadge").textContent = DATA.meta.status;
+
+// ---------- helpers ----------
+const entById = Object.fromEntries(DATA.entities.map(e => [e.id, e]));
+const catOf = e => DATA.categories[e.category];
+const healthColor = s => s >= 70 ? "#5fd48a" : s >= 45 ? "#d4c25f" : "#e8554e";
+const fmtAmt = a => a >= 1 ? `$${a}B` : `$${Math.round(a*1000)}M`;
+
+function visibleFlows() {
+  return DATA.flows.filter(f =>
+    !hiddenCats.has(entById[f.source]?.category) &&
+    !hiddenCats.has(entById[f.target]?.category));
+}
+function visibleEntities() {
+  return DATA.entities.filter(e => !hiddenCats.has(e.category));
+}
+
+// ---------- legend ----------
+function renderLegend() {
+  const lg = d3.select("#legend").html("");
+  Object.entries(DATA.categories).forEach(([key, c]) => {
+    lg.append("span")
+      .classed("dim", hiddenCats.has(key))
+      .html(`<i style="background:${c.color}"></i>${c.zh} ${c.en}`)
+      .on("click", () => {
+        hiddenCats.has(key) ? hiddenCats.delete(key) : hiddenCats.add(key);
+        renderLegend(); render();
+      });
+  });
+}
+
+// ---------- detail panel ----------
+function showDetail(ent) {
+  const flows = DATA.flows.filter(f => f.source === ent.id || f.target === ent.id);
+  const h = ent.health || {};
+  let html = `<div class="card">
+    <div class="name">${ent.name}</div>
+    <div class="cat">${catOf(ent).zh} / ${catOf(ent).en}</div>
+    <div class="health-bar"><i style="width:${h.score ?? 0}%;background:${healthColor(h.score ?? 0)}"></i></div>
+    <div class="cat">健康度 Health: ${h.score ?? "—"}/100</div>
+    ${h.notesZh ? `<div class="cat" style="margin-top:5px">${h.notesZh}<br><i>${h.notesEn ?? ""}</i></div>` : ""}
+  </div><h2>資金流 / Flows (${flows.length})</h2>`;
+  flows.sort((a,b) => b.amount - a.amount).forEach(f => {
+    const dir = f.source === ent.id ? "→ " + entById[f.target].name : "← " + entById[f.source].name;
+    const ft = DATA.flowTypes[f.type];
+    html += `<div class="flow-row">
+      <span class="amt">${fmtAmt(f.amount)}</span> ${dir}
+      <span class="cat">[${ft.zh} ${ft.en}]</span>
+      <span class="conf ${f.confidence}">${f.confidence}</span>
+      <div class="cat">${f.noteZh ?? ""} ${f.noteEn ? "/ " + f.noteEn : ""}</div>
+      <div class="cite">📎 ${f.citation ?? ""} (${f.date ?? ""})</div>
+    </div>`;
+  });
+  document.getElementById("detail").innerHTML = html;
+}
+
+// ---------- view: force network ----------
+let sim;
+function renderNetwork() {
+  svg.html(""); document.getElementById("healthView").style.display = "none"; svg.style("display", null);
+  const ents = visibleEntities().map(e => ({...e}));
+  const flows = visibleFlows().map(f => ({...f}));
+  const maxAmt = d3.max(flows, f => f.amount) || 1;
+
+  const g = svg.append("g");
+  svg.call(d3.zoom().scaleExtent([0.3, 4]).on("zoom", ev => g.attr("transform", ev.transform)));
+
+  const link = g.selectAll("line").data(flows).join("line")
+    .attr("stroke", f => DATA.categories[entById[f.source].category].color)
+    .attr("stroke-opacity", 0.55)
+    .attr("stroke-width", f => 1.5 + 8 * Math.sqrt(f.amount / maxAmt))
+    .attr("stroke-dasharray", f => DATA.flowTypes[f.type].dash)
+    .on("mousemove", (ev, f) => {
+      const ft = DATA.flowTypes[f.type];
+      tooltip.style("display", "block")
+        .style("left", ev.offsetX + 14 + "px").style("top", ev.offsetY + 14 + "px")
+        .html(`<b>${entById[f.source].name} → ${entById[f.target].name}</b><br>
+          ${fmtAmt(f.amount)} · ${ft.zh} ${ft.en} · <span class="conf ${f.confidence}">${f.confidence}</span><br>
+          ${f.noteZh ?? ""}`);
+    })
+    .on("mouseout", () => tooltip.style("display", "none"));
+
+  const node = g.selectAll("g.node").data(ents).join("g").attr("class", "node")
+    .style("cursor", "pointer")
+    .call(d3.drag()
+      .on("start", (ev, d) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag", (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+      .on("end", (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = d.fy = null; }))
+    .on("click", (ev, d) => showDetail(entById[d.id]));
+
+  const degree = {};
+  flows.forEach(f => { degree[f.source] = (degree[f.source]||0)+f.amount; degree[f.target] = (degree[f.target]||0)+f.amount; });
+  const r = d => 10 + 16 * Math.sqrt((degree[d.id]||1) / (d3.max(Object.values(degree))||1));
+
+  node.append("circle")
+    .attr("r", r)
+    .attr("fill", d => catOf(d).color)
+    .attr("stroke", d => healthColor(d.health?.score ?? 50))
+    .attr("stroke-width", 2.5);
+  node.append("text")
+    .text(d => d.name)
+    .attr("text-anchor", "middle").attr("dy", d => r(d) + 13)
+    .attr("fill", "var(--text)").attr("font-size", 11);
+
+  sim = d3.forceSimulation(ents)
+    .force("link", d3.forceLink(flows).id(d => d.id).distance(130).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-500))
+    .force("center", d3.forceCenter(W()/2, H()/2))
+    .force("collide", d3.forceCollide().radius(d => r(d) + 22))
+    .on("tick", () => {
+      link.attr("x1", f => f.source.x).attr("y1", f => f.source.y)
+          .attr("x2", f => f.target.x).attr("y2", f => f.target.y);
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+}
+
+// ---------- view: sankey ----------
+function renderSankey() {
+  svg.html(""); document.getElementById("healthView").style.display = "none"; svg.style("display", null);
+  const ents = visibleEntities();
+  const ids = new Set(ents.map(e => e.id));
+  const flows = visibleFlows().filter(f => ids.has(f.source) && ids.has(f.target) && f.amount > 0);
+  // sankey cannot handle cycles — break by duplicating return nodes
+  const nodes = ents.map(e => ({ id: e.id, name: e.name, cat: e.category }));
+  const seen = new Set(), links = [];
+  flows.forEach(f => {
+    let t = f.target;
+    if (seen.has(`${f.target}->${f.source}`)) { // cycle: clone target
+      const cloneId = f.target + "__r";
+      if (!nodes.find(n => n.id === cloneId))
+        nodes.push({ id: cloneId, name: entById[f.target].name + " ⟲", cat: entById[f.target].category });
+      t = cloneId;
+    }
+    seen.add(`${f.source}->${f.target}`);
+    links.push({ source: f.source, target: t, value: f.amount, raw: f });
+  });
+  try {
+    const sankey = d3.sankey().nodeId(d => d.id).nodeWidth(16).nodePadding(18)
+      .extent([[20, 20], [W() - 240, H() - 20]]);
+    const graph = sankey({ nodes: nodes.map(d => ({...d})), links: links.map(d => ({...d})) });
+    const g = svg.append("g");
+    g.selectAll("path").data(graph.links).join("path")
+      .attr("d", d3.sankeyLinkHorizontal())
+      .attr("fill", "none")
+      .attr("stroke", d => DATA.categories[d.source.cat].color)
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", d => Math.max(1.5, d.width))
+      .on("mousemove", (ev, d) => {
+        const f = d.raw, ft = DATA.flowTypes[f.type];
+        tooltip.style("display","block").style("left", ev.offsetX+14+"px").style("top", ev.offsetY+14+"px")
+          .html(`<b>${d.source.name} → ${d.target.name}</b><br>${fmtAmt(f.amount)} · ${ft.zh} · ${f.confidence}<br>${f.noteZh ?? ""}`);
+      }).on("mouseout", () => tooltip.style("display","none"));
+    const n = g.selectAll("g.sn").data(graph.nodes).join("g");
+    n.append("rect")
+      .attr("x", d => d.x0).attr("y", d => d.y0)
+      .attr("width", d => d.x1 - d.x0).attr("height", d => Math.max(2, d.y1 - d.y0))
+      .attr("fill", d => DATA.categories[d.cat].color).attr("rx", 3)
+      .style("cursor","pointer")
+      .on("click", (ev, d) => entById[d.id.replace(/__r$/,"")] && showDetail(entById[d.id.replace(/__r$/,"")]));
+    n.append("text")
+      .attr("x", d => d.x1 + 6).attr("y", d => (d.y0 + d.y1)/2).attr("dy", "0.35em")
+      .attr("fill", "var(--text)").attr("font-size", 11.5).text(d => d.name);
+  } catch (e) {
+    svg.append("text").attr("x", 30).attr("y", 50).attr("fill", "var(--muted)")
+      .text("Sankey 佈局失敗（可能存在循環流）/ layout failed: " + e.message);
+  }
+}
+
+// ---------- view: health table ----------
+function renderHealth() {
+  svg.style("display", "none");
+  const hv = document.getElementById("healthView");
+  hv.style.display = "block";
+  const rows = visibleEntities().slice().sort((a,b) => (a.health?.score ?? 50) - (b.health?.score ?? 50));
+  hv.innerHTML = `<table class="health">
+    <tr><th>公司 Company</th><th>類別 Category</th><th>健康度 Health</th><th>流入 In</th><th>流出 Out</th><th>備註 Notes</th></tr>
+    ${rows.map(e => {
+      const inflow = DATA.flows.filter(f => f.target === e.id).reduce((s,f) => s+f.amount, 0);
+      const outflow = DATA.flows.filter(f => f.source === e.id).reduce((s,f) => s+f.amount, 0);
+      const s = e.health?.score ?? 50;
+      return `<tr>
+        <td><b>${e.name}</b></td>
+        <td style="color:${catOf(e).color}">${catOf(e).zh}</td>
+        <td><div class="health-bar" style="width:120px"><i style="width:${s}%;background:${healthColor(s)}"></i></div>${s}/100</td>
+        <td>${fmtAmt(inflow)}</td><td>${fmtAmt(outflow)}</td>
+        <td style="color:var(--muted);font-size:11.5px">${e.health?.notesZh ?? ""}</td>
+      </tr>`;
+    }).join("")}
+  </table>`;
+}
+
+// ---------- view: contagion ----------
+function renderContagion() {
+  renderNetwork(); // base layer
+  const detail = document.getElementById("detail");
+  let html = `<h2>傳染模擬 / Contagion Simulation</h2>
+    <div class="contagion-controls">
+      <select id="trigSel">${visibleEntities().map(e => `<option value="${e.id}">${e.name}</option>`).join("")}</select>
+      <button id="runBtn">模擬違約 Simulate Default</button>
+    </div>
+    <p class="hint">選擇一間公司模擬其資產健康度崩潰，沿資金流（債務/租賃/採購承諾權重較高）逐層傳染。<br>Pick a company; failure propagates along flows (debt/lease/purchase weighted higher).</p>
+    <div id="cascadeLog"></div>`;
+  detail.innerHTML = html;
+  document.getElementById("runBtn").onclick = () => {
+    const trigger = document.getElementById("trigSel").value;
+    const weight = { guarantee: 1.0, debt: 1.0, lease: 0.9, purchase: 0.8, spv: 0.9, equity: 0.6, revenue: 0.5 };
+    // BFS along flows in both directions, attenuating
+    const infected = new Map([[trigger, 1]]);
+    let frontier = [trigger];
+    const waves = [[trigger]];
+    while (frontier.length) {
+      const next = [];
+      frontier.forEach(id => {
+        DATA.flows.forEach(f => {
+          const other = f.source === id ? f.target : f.target === id ? f.source : null;
+          if (!other || infected.has(other)) return;
+          const impact = infected.get(id) * (weight[f.type] ?? 0.5) * Math.min(1, f.amount / 20);
+          if (impact > 0.05) { infected.set(other, impact); next.push(other); }
+        });
+      });
+      if (next.length) waves.push(next);
+      frontier = next;
+    }
+    // animate waves
+    const node = svg.selectAll("g.node");
+    node.selectAll("circle").classed("pulse", false).attr("opacity", d => infected.has(d.id) ? 1 : 0.18);
+    svg.selectAll("line").attr("opacity", f =>
+      infected.has(typeof f.source === "object" ? f.source.id : f.source) &&
+      infected.has(typeof f.target === "object" ? f.target.id : f.target) ? 0.9 : 0.06);
+    waves.forEach((wave, i) => setTimeout(() => {
+      node.filter(d => wave.includes(d.id)).selectAll("circle")
+        .classed("pulse", true).attr("stroke", "#e8554e").attr("stroke-width", 4);
+    }, i * 700));
+    document.getElementById("cascadeLog").innerHTML =
+      `<h2 style="margin-top:12px">傳染波次 / Waves</h2>` +
+      waves.map((w, i) => `<div class="flow-row"><b>T+${i}</b>: ${w.map(id => entById[id].name).join(", ")}</div>`).join("");
+  };
+}
+
+// ---------- view: leverage ----------
+function renderLeverage() {
+  svg.style("display", "none");
+  const hv = document.getElementById("healthView");
+  hv.style.display = "block";
+  const fmtX = v => v == null ? "—" : (v === Infinity ? "∞" : v.toFixed(1) + "×");
+  const fmtB = v => v == null ? "—" : `$${v.toFixed(1)}B`;
+  const rows = visibleEntities().filter(e => e.leverage)
+    .sort((a,b) => (b.leverage.effectiveLeverage ?? -1) - (a.leverage.effectiveLeverage ?? -1));
+  let html = "";
+  if (!rows.length) {
+    html = `<p style="color:var(--muted)">槓桿數據合併中（Round 3 SEC 文件研究進行中）/ Leverage data pending (Round 3 SEC research in flight).</p>`;
+  } else {
+    const maxLev = Math.max(...rows.map(r => r.leverage.effectiveLeverage ?? 0), 1);
+    html = `<table class="health">
+      <tr><th>公司 Company</th><th>表內債務<br>On-B/S Debt</th><th>現金<br>Cash</th><th>表外承諾<br>Off-B/S</th>
+      <th>債務/EBITDA<br>Debt/EBITDA</th><th>OCF − Capex<br>(FCF)</th><th>有效槓桿*<br>Effective Lev.</th><th>期間 Period</th></tr>
+      ${rows.map(e => {
+        const l = e.leverage;
+        const lev = l.effectiveLeverage;
+        const levColor = lev == null ? "var(--muted)" : lev >= 6 ? "#e8554e" : lev >= 3 ? "#d4c25f" : "#5fd48a";
+        return `<tr>
+          <td><b>${e.name}</b><div style="color:${catOf(e).color};font-size:11px">${catOf(e).zh}</div></td>
+          <td>${fmtB(l.totalDebt)}</td><td>${fmtB(l.cash)}</td><td>${fmtB(l.offBS)}</td>
+          <td>${fmtX(l.debtToEbitda)}</td>
+          <td style="color:${(l.fcf ?? 0) < 0 ? '#e8554e' : '#5fd48a'}">${fmtB(l.fcf)}</td>
+          <td><div class="health-bar" style="width:110px"><i style="width:${Math.min(100, (lev ?? 0)/maxLev*100)}%;background:${levColor}"></i></div>
+            <span style="color:${levColor};font-weight:700">${fmtX(lev)}</span></td>
+          <td style="color:var(--muted);font-size:11px">${l.period ?? ""}</td>
+        </tr>
+        <tr><td colspan="8" style="color:var(--muted);font-size:11.5px;border-bottom:1px solid var(--border);padding-top:0">
+          ${(l.keyRisksZh ?? []).map(r => "· " + r).join("　")} <span style="font-size:10px">📎 ${l.citation ?? ""}</span></td></tr>`;
+      }).join("")}
+    </table>
+    <p style="color:var(--muted);font-size:11.5px">* 有效槓桿 = (表內債務 + 表外承諾) / EBITDA（或揭露之替代基準）。Effective leverage = (on-B/S debt + off-B/S commitments) / EBITDA (or disclosed proxy).</p>`;
+  }
+  // ---- 資金循環乘數 / capital circularity ----
+  if (DATA.circularity?.length) {
+    html += `<h2 style="font-size:16px;margin-top:28px">資金循環：同一筆錢被計算幾次 / Capital Circularity: how many times one dollar is counted</h2>`;
+    DATA.circularity.forEach(c => {
+      const chainHtml = c.chain.map((id, i) => {
+        const e = entById[id];
+        return `<span style="background:var(--panel2);border:1px solid ${e ? catOf(e).color : 'var(--border)'};border-radius:8px;padding:2px 9px;font-size:12px;white-space:nowrap">${e ? e.name : id}</span>` +
+          (i < c.chain.length - 1 ? ` <span style="color:var(--accent)">→</span> ` : "");
+      }).join("");
+      html += `<div class="card" style="margin-top:10px">
+        <div class="name" style="font-size:13.5px">${c.titleZh} <span class="conf ${c.confidence}">${c.confidence}</span>
+          <span style="float:right;color:var(--accent);font-weight:800;font-size:16px">${c.multiplier}</span></div>
+        <div style="margin:8px 0;line-height:2.2">${chainHtml}</div>
+        <div class="cat">${c.descZh}<br><i>${c.descEn ?? ""}</i></div>
+        <div class="cite">📎 ${c.citation ?? ""}</div>
+      </div>`;
+    });
+  }
+  hv.innerHTML = html;
+}
+
+// ---------- router ----------
+function render() {
+  ({ network: renderNetwork, sankey: renderSankey, health: renderHealth, contagion: renderContagion, leverage: renderLeverage })[currentView]();
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  currentView = b.dataset.view;
+  render();
+});
+window.onresize = render;
+renderLegend();
+render();
+</script>
+</body>
+</html>

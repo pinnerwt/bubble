@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美國 AI 資金鏈系統性風險研究報告 / US AI Capital Chain Systemic Risk Report</title>
+<style>
+  :root { --bg:#0e1117; --panel:#161b24; --border:#2a3344; --text:#e6e9ef; --muted:#8b94a7; --accent:#e8554e; --green:#5fd48a; --yellow:#d4c25f; }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Noto Sans TC","PingFang TC",system-ui,sans-serif; line-height:1.85; margin:0; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 26px; line-height:1.4; }
+  h1 .en { display:block; font-size:15px; color:var(--muted); font-weight:400; margin-top:4px; }
+  h2 { font-size:20px; margin-top:48px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+  h2 .en { font-size:13px; color:var(--muted); font-weight:400; margin-left:8px; }
+  h3 { font-size:16px; margin-top:28px; }
+  .meta { color:var(--muted); font-size:13px; }
+  .box { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:18px 0; }
+  .box.warn { border-left:4px solid var(--accent); }
+  .box.key { border-left:4px solid var(--yellow); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin:16px 0; }
+  th, td { padding:9px 11px; text-align:left; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; font-size:12px; }
+  .conf { font-size:10.5px; padding:1px 7px; border-radius:8px; white-space:nowrap; }
+  .conf.confirmed { background:#1d3a2a; color:#5fd48a; }
+  .conf.reported { background:#3a341d; color:#d4c25f; }
+  .conf.estimate { background:#3a1d1d; color:#d45f5f; }
+  .en-note { color:var(--muted); font-size:0.88em; }
+  .chain { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin:14px 0; font-size:14px; }
+  .chain .arrow { color:var(--accent); font-weight:700; }
+  .rank { font-size:30px; font-weight:800; color:var(--accent); float:left; margin-right:14px; line-height:1.1; }
+  ol li, ul li { margin: 6px 0; }
+  a { color:#6ea8ff; }
+  .small { font-size:12.5px; color:var(--muted); }
+  sup a { text-decoration:none; font-size:10px; }
+  .src-list { font-size:12.5px; color:var(--muted); }
+  .src-list li { margin:4px 0; word-break:break-all; }
+  blockquote { border-left:3px solid var(--border); margin:14px 0; padding:4px 16px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>美國 AI 資金鏈系統性風險研究：誰是最薄弱的一環？
+<span class="en">Systemic Risk in the US AI Capital Chain: Which Link Breaks First?</span></h1>
+<p class="meta">數據截止 As of: 2026-06-05 ·
+方法 Method: 五輪多代理深度研究（~530 個代理、~120 個來源、127 條 claim 經 3 票對抗式驗證，119 確認 / 4 否決 / 4 排除；Round 3-5 直接逐行核對 SEC EDGAR 10-K/10-Q/8-K 原文）+ 定向一手文件補抓 ·
+參考 Reference: Michael Burry, "Heretic's Guide to AI's Stars" 系列 ·
+互動圖表 Interactive viz: <a href="index.html">index.html</a>（含「槓桿 Leverage」分頁）</p>
+
+<div class="box warn">
+<b>一句話結論 / Bottom line</b><br>
+最可能破產的公司是 <b>CoreWeave</b>（SEC 文件確認：FY25 償債 $4.4B＞營運現金流 $3.1B、現金 $2.2B 對 2026 年內到期 $6.1B、含表外有效槓桿 ~24×）；但「最薄弱的一步」不是單一公司，而是 <b>GPU 抵押私募信貸層</b>——在這裡，同一條客戶現金流被疊上 <b>5-7 層索賠</b>（advance rate 達 102% LTC，債可超過資產成本），四大巨頭另有 <b>~$561B 未開始租約 + $674B 採購承諾</b>掛在表外。引爆器是 <b>OpenAI 的承諾支出 vs 營收缺口</b>（~$1.4T vs ~$13B），而 <b>SoftBank 用 OpenAI 股權做抵押的保證金貸款</b>（已被市場砍 40%）是估值下修時最快斷裂的傳導線。<br>
+<span class="en-note">The single most likely bankruptcy is CoreWeave; but the weakest <i>step</i> is the GPU-collateralized private credit layer where junk-rated neocloud debt, optimistic depreciation schedules, and pension/insurance money converge. The detonator is OpenAI's commitments-vs-revenue gap (~$1.4T vs ~$13B), and SoftBank's margin loan collateralized by its OpenAI stake is the fastest-snapping transmission line when the valuation marks down.</span>
+</div>
+
+<h2>1. 資金從哪裡來、流到哪裡去 <span class="en">Where the money comes from and where it goes</span></h2>
+
+<p>把 2026 年中的美國 AI 資金鏈攤開，錢的路徑大致是四層：</p>
+<ol>
+<li><b>退休金與保險</b>（最終出資人）→ 退休基金持有私募信貸基金 <b>~31%</b> 的資產（Fed via FSB）、壽險投資組合 <b>~10%</b> 在私募信貸；紐約州與賓州退休金直接出現在 Blue Owl $7B 數位基建基金的 LP 名單上（參議院信函點名）。<sup><a href="#s-fsb">[FSB]</a><a href="#s-senate">[Sen]</a></sup></li>
+<li><b>私募信貸 / PE</b>（結構設計者）→ Blackstone 錨定 CoreWeave $8.5B DDTL 4.0（攜保險資金）；Apollo+Blackstone 共構 ~$36B Anthropic TPU SPV；Blue Owl 一家橫跨 Meta Hyperion JV（80%）、Stargate Abilene JV、$7B 退休金基金三大結構；銀行另對私募信貸基金授信 <b>~$220B</b>（FSB）。</li>
+<li><b>SPV / 合資 / 表外結構</b>（風險的藏匿層）→ Moody's 統計五大雲端巨頭「尚未開始的租約」表外承諾達 <b>$662B</b>＝其調整後總債務的 <b>113%</b>、美國 GDP 的 ~2%；Meta 單獨揭露 $28B 殘值擔保<b>未列為或有負債</b>。<sup><a href="#s-moodys">[Moody's]</a></sup></li>
+<li><b>實體資產層</b>（GPU/TPU/資料中心/電力）→ 錢最終變成晶片與廠房，而這些資產的帳面價值建立在 5.5–6 年折舊假設上——資產還能用 5-7 年（觀測事實），但 <b>H100 租金已在兩年內崩跌 60-75%</b>（現金流先死，資產後死）。<sup><a href="#s-gpu">[GPU]</a></sup></li>
+</ol>
+
+<div class="box key">
+<b>循環融資的三個教科書案例 / Three textbook circular structures</b>
+<ul>
+<li><b>Nvidia–CoreWeave–OpenAI 三角</b>：Nvidia 持 CoreWeave ~7% 股權＋承諾回購其未售算力（上限 $6.3B）；OpenAI 付 CoreWeave $22.4B 買算力、同時收 $350M CoreWeave 股票。供應商投資客戶、擔保客戶的需求、客戶的客戶收客戶的股票。<span class="conf confirmed">confirmed</span></li>
+<li><b>AMD–OpenAI 認股權證</b>：6GW 標題中僅 1GW 有約束力；AMD 發給 OpenAI 160M 股權證（$0.01 行使價、~10% 股本），解鎖條件綁採購里程碑＋AMD 股價漲到 $600——把客戶變成自家股價的多頭。<span class="conf confirmed">confirmed (SEC 8-K)</span></li>
+<li><b>Broadcom–Anthropic TPU SPV</b>：Broadcom 為自家生態系晶片的<b>殘值</b>提供擔保，把 A2 段利率壓到 ~5.75%——晶片商替自己產品的折舊風險投保。<span class="conf reported">reported</span></li>
+</ul>
+<span class="en-note">BIS 的評語適用於全部三者：「槓桿不會因為移出資產負債表就消失。」("Leverage does not disappear by being out of sight.")</span>
+</div>
+
+<h2>2. 破產候選排名 <span class="en">Bankruptcy candidates, ranked</span></h2>
+
+<h3><span class="rank">#1</span> CoreWeave — 最可能破產 <span class="en">Most likely bankruptcy</span></h3>
+<table>
+<tr><th>面向</th><th>事實</th><th>信心</th></tr>
+<tr><td>債務規模</td><td>$14B+，母公司垃圾級（Moody's Ba3 / S&P B+ / Fitch BB-）</td><td><span class="conf confirmed">confirmed</span></td></tr>
+<tr><td>市場訊號</td><td>六週估值 -46%；5 年 CDS 從 ~360 飆至 ~640bps（2025 Q4, Deutsche Bank）</td><td><span class="conf reported">reported</span></td></tr>
+<tr><td>折舊缺口</td><td>2023 年把折舊<b>從 5 年延長到 6 年</b>（當年費用少列 $20M）；DDTL 5.0 的 5.5 年期明文「對齊 GPU 使用壽命」——把爭議假設寫進資本結構</td><td><span class="conf confirmed">confirmed (10-K/8-K)</span></td></tr>
+<tr><td>對手集中</td><td>DDTL 4.0 的投資級評級依賴<b>單一客戶</b>（Meta ~$19B backlog）；DDTL 5.0 抵押現金流依賴<b>兩家未具名的垃圾級客戶</b></td><td><span class="conf confirmed">confirmed</span></td></tr>
+<tr><td>⚠ 隔離失效</td><td>DDTL 5.0 由 <b>CoreWeave Inc. 無條件全額擔保</b>＋100% 股權質押（8-K）——SPV 不是破產隔離，違約直接回傷母公司全體債權人</td><td><span class="conf confirmed">confirmed</span></td></tr>
+<tr><td>監管定性</td><td>四位參議員致函 FSOC：neocloud 是「第一張倒下的骨牌」</td><td><span class="conf confirmed">confirmed</span></td></tr>
+</table>
+<p class="small">平衡觀點：S&P 後續曾把展望調為正向；Nvidia 回購背書與 5 年期合約覆蓋是真實的緩衝——但背書有 $6.3B 上限，且合約對手本身（OpenAI、兩家垃圾級匿名客戶）就是風險源。<span class="en-note">Balance: S&P later moved the outlook to positive; the Nvidia backstop and contract coverage are real buffers — but the backstop is capped at $6.3B and the contract counterparties are themselves the risk.</span></p>
+
+<h3><span class="rank">#2</span> SoftBank — 最脆弱的股權持有人 <span class="en">Most fragile equity holder</span></h3>
+<p>對 OpenAI 承諾 <b>$64.6B</b>（~13% 股權）；為此賣掉 Nvidia（$5.83B）與 T-Mobile（$12.73B）持股、舉 $40B 過橋貸款、再疊一筆 <b>$10B 保證金貸款——抵押品就是 OpenAI 股權本身</b>（SOFR+425，~7.88%）。總債務 ~$135B、S&P BB+ 展望負向、CDS ~360bps、兩年資金缺口估 $32B。這是對 OpenAI 估值（$852B，一級市場無日常定價）的<b>槓桿化單邊押注</b>：估值下修 → 抵押品縮水 → 追繳保證金 → 被迫拋售 → Stargate 出資斷流。<span class="conf reported">reported</span></p>
+
+<h3><span class="rank">#3</span> Anthropic TPU SPV（Burry 的 $38B）— 最薄弱的新結構 <span class="en">Weakest new structure</span></h3>
+<p>~$36B 分層（$6B A1 / $25B A2 @ ~5.75% / <b>$4.5B B 段＝無增強損失層</b>），Anthropic 租金是唯一主要還款來源，6/5 仍在銷售未 close。Anthropic 基本面相對健康（run-rate $14B→$47B、手握 $30B Series G + 雙巨頭里程碑注資），但其營收有 ~$8B 的 gross/net 認列爭議，且 Broadcom 殘值擔保的上限與觸發條款<b>完全未公開</b>。Burry 選擇在 Part IV 之前先貼出這張結構圖，不是偶然——這是把「晶片商自保自賣」推到極致的版本。<span class="conf reported">reported</span></p>
+
+<h3><span class="rank">#4</span> Oracle — 公開債市的最大傳導體 <span class="en">Largest IG transmission channel</span></h3>
+<p>債務≈現金 4 倍；$300B AI 合約（OpenAI 為主）；CDS 151.3bps 創 2009 年以來新高、CDS 成交量六週 $4.2B（去年同期 <$200M）；S&P/Moody's 雙雙展望負向。Oracle 不太會「破產」，但它是 OpenAI 風險進入<b>公開投資級債市、貨幣基金、401(k)</b> 的最大單一管道。<span class="conf reported">reported</span></p>
+
+<h3>未上榜但值得注意 <span class="en">Honorable mentions</span></h3>
+<ul>
+<li><b>OpenAI 本身</b>：~$1.4T 承諾 vs ~$13B 營收、HSBC 估 2030 前缺口 $207B——但它有 $852B 估值與全球資本的支持，「跑不出現金流」與「破產」之間還隔著很多輪融資。它是<b>引爆器</b>，不是第一個倒下的。</li>
+<li><b>Crusoe / Abilene</b>：2026-03 約 600MW 擴建取消、Microsoft 接收相鄰產能——整個系統第一個<b>實體層面</b>的需求軟化訊號。</li>
+<li><b>Meta</b>：$28B 殘值擔保未列或有負債 + Hyperion 出表 + 同週發 $30B 公司債——財務最健康，但會計最不透明（Burry 估其 2028 盈餘高估 20.8%）。</li>
+</ul>
+
+<h2>3. 傳染鏈：一環扣一環怎麼垮 <span class="en">The cascade, link by link</span></h2>
+
+<div class="chain">
+<b>主路徑（監管機構已書面確認的版本）/ Primary path (the one regulators have already documented):</b><br><br>
+OpenAI 營收不及承諾 <span class="arrow">→</span> 算力合約縮減 <span class="arrow">→</span> CoreWeave SPV 抵押現金流中斷（GPU 租金市價已先跌 60-75%）<span class="arrow">→</span> <b>母公司擔保把 SPV 違約拉回 CoreWeave Inc.</b> <span class="arrow">→</span> 「可二級市場交易」的 GPU 債（DDTL 5.0 首創）價格崩跌、把私下的減記變成公開的市價 <span class="arrow">→</span> Blackstone/Apollo/Blue Owl 基金淨值下修 <span class="arrow">→</span> 壽險（組合 ~10%）、退休金 LP（~31%）、銀行授信（~$220B）三路同時受擊 <span class="arrow">→</span> 資料中心 CMBS（佔 SASB 市場 13%）重定價 <span class="arrow">→</span> 信用緊縮回頭掐死其餘 AI 建設融資。
+<br><br><span class="en-note">FSB（2026-05）、BIS（Bulletin 120 + 2026-03 季報）、參議院銀行委員會（2026-01 FSOC 信函）各自獨立畫出了這條鏈的不同段落；本研究只是把三張圖接起來。</span>
+</div>
+
+<div class="chain">
+<b>最快路徑（市場先生的版本）/ Fastest path (Mr. Market's version):</b><br><br>
+OpenAI 估值下修（任何一輪 down round 或 IPO 定價不及 $852B）<span class="arrow">→</span> SoftBank $110B 帳面持股縮水、<b>$10B 保證金貸款追繳</b> <span class="arrow">→</span> 被迫拋售流動資產（重演 2025 賣 Nvidia/T-Mobile）<span class="arrow">→</span> Stargate 出資斷流、SoftBank CDS 飆升 <span class="arrow">→</span> 「AI 基建融資不可靠」敘事自我實現 <span class="arrow">→</span> 全部 neocloud/SPV 再融資窗口同時關閉（CoreWeave 2031 年到期牆提前引爆）。
+</div>
+
+<div class="chain">
+<b>Burry 路徑（折舊版本）/ Burry's path (the depreciation version):</b><br><br>
+會計現實追上來：GPU 按 2-3 年經濟壽命重新計提 <span class="arrow">→</span> 五大巨頭 2026-28 盈餘高估 $176B 現形（Oracle 26.9%、Meta 20.8%）<span class="arrow">→</span> 股價重定價 + GPU 抵押品按真實殘值重估 <span class="arrow">→</span> 所有 GPU 抵押債務同步減記。<br><br>
+<span class="en-note">本研究對此持保留：二手 A100 在六年後仍保有 ~20-47% 殘值、Azure 上的舊 GPU 實際服役 7-9 年——Burry 的 2-3 年論在「資產報廢」意義上偏激進。但他抓對了更重要的東西：<b>租金（現金流）跌得比資產快得多</b>。H100 租金兩年 -60~75%。債是用現金流還的，不是用「還能用的晶片」還的。</span>
+</div>
+
+<h2>4. 對 Burry 論點的驗證結果 <span class="en">Scoring Burry's thesis</span></h2>
+<table>
+<tr><th>Burry 主張</th><th>驗證結果</th></tr>
+<tr><td>Apollo $38B 為 Google TPU（供 Anthropic）融資</td><td>✅ 實為 Apollo+Blackstone ~$36B，結構與他描述一致（SPV 買 TPU → 租給 Anthropic），6/5 尚未 close</td></tr>
+<tr><td>巨頭高估晶片壽命、低估折舊 $176B（2026-28）</td><td>⚠ 方向對、幅度存疑：租金崩跌支持他；二手殘值與 7-9 年實際服役紀錄反對他；Amazon 反而把折舊縮短到 5 年</td></tr>
+<tr><td>循環融資掩蓋真實需求</td><td>✅ 三個案例經 SEC 文件確認（Nvidia-CoreWeave-OpenAI、AMD 權證、Broadcom RVG）；且 Nvidia 自己正在退出（$100B 承諾只投 $30B）——內部人行為與他的論點一致</td></tr>
+<tr><td>退休金是最終接盤者</td><td>✅ FSB/Fed/參議院三方數據確認（~31% LP 占比、NY/PA 點名）</td></tr>
+</table>
+
+<h2>5. SEC 槓桿法證：帳上、帳外、與「同一筆錢」 <span class="en">SEC leverage forensics: on-book, off-book, and "the same dollar"</span></h2>
+
+<p>Round 3-5 直接逐行核對 10-K/10-Q/8-K（含 XBRL 交叉驗證），得到每家公司的實際槓桿——含表外：</p>
+
+<table>
+<tr><th>公司</th><th>表內債務</th><th>表外承諾</th><th>FCF</th><th>有效槓桿*</th><th>一句話</th></tr>
+<tr><td><b>CoreWeave</b></td><td>$25.1B</td><td>~$50B</td><td style="color:#e8554e">-$7.25B</td><td style="color:#e8554e"><b>~24×</b></td><td>債務 15 個月 3 倍；FY25 償債 $4.4B＞OCF $3.1B；現金 $2.2B vs 2026 內到期 $6.1B</td></tr>
+<tr><td><b>Oracle</b></td><td>$134.6B</td><td>未揭露</td><td style="color:#e8554e">-$24.7B</td><td>5.7×</td><td>RPO $553B（+325%）；capex ≈ OCF 2 倍——把自己改造成 OpenAI 的槓桿代理人</td></tr>
+<tr><td><b>Meta</b></td><td>$86.7B</td><td><b>$448.6B</b></td><td>$49.5B</td><td>4.2×</td><td>$28B RVG 零負債認列；自揭最大曝險 $45.99B；表外租約至 2036/最長 30 年</td></tr>
+<tr><td><b>Alphabet</b></td><td>$95.9B</td><td><b>$478.7B</b></td><td>$40.5B</td><td>3.1×</td><td>正在變成 neocloud 的保險人：信用衍生品 $28.4B + 擔保 $9B + backstop 框架 $33.3B</td></tr>
+<tr><td><b>Amazon</b></td><td>$227.5B</td><td>$210.1B</td><td style="color:#d4c25f">$1.2B</td><td>2.9×</td><td>債一季 +$54B；TTM FCF $25.9B→$1.2B；Q1 獲利 65% 是 Anthropic Level 3 紙上增值</td></tr>
+<tr><td><b>Microsoft</b></td><td>$125.4B</td><td>$196.6B</td><td>$37.2B</td><td>1.9×</td><td>未開始租約全場最大；現金 9 個月 -$16B；$5.9B OpenAI 利益是一次性稀釋利得</td></tr>
+<tr><td><b>Nvidia</b></td><td>$8.5B</td><td>$185.5B</td><td style="color:#5fd48a">$194.4B</td><td>1.0×</td><td>帳面最乾淨、循環最深：37% OCF 回灌客戶生態系（見下）</td></tr>
+<tr><td><b>Broadcom</b></td><td>$64.9B</td><td>$4.3B†</td><td style="color:#5fd48a">$41.0B</td><td>1.6×</td><td>†報導中 ~$31B TPU 殘值擔保<b>在所有文件中零揭露</b>——或有負債真空</td></tr>
+<tr><td><b>SoftBank</b></td><td>~$135B（合併）</td><td>—</td><td>—</td><td>自報 LTV 17%</td><td>OpenAI 持股在官方 NAV 中不單列；保證金貸款目標被市場砍 40% 至 $6B</td></tr>
+</table>
+<p class="small">* 有效槓桿 = (表內債務+表外承諾)/年化營運現金流。四大巨頭未開始租約合計 <b>~$561B</b>、採購承諾另 <b>$674B+</b>——全部不在資產負債表上。<span class="en-note">Four hyperscalers' uncommenced leases total ~$561B with $674B+ purchase obligations on top — none of it on balance sheet.</span></p>
+
+<h3>「同一筆錢被用幾次」：filing 級答案 <span class="en">"How many times is one dollar used" — the filing-level answer</span></h3>
+<div class="box warn">
+<b>CoreWeave 的一條客戶現金流上疊著 5-7 層索賠</b>（DDTL 4.0 條款書原文）：SPV 資產質押 + 客戶合約質押 + SPV 股權質押 + 資料中心租約質押 + 母公司無條件擔保（除 4.0 外全部）+ 計入 $98.8B RPO 支撐公司債與股價 + 同一義務掛在雲端巨頭自己帳上。Advance rate 建設期 90% LTC、穩定後切換 1.2x DSCR ⇒ <b>可達 ~102% LTC——債務可以超過資產成本</b>。
+</div>
+<ul>
+<li><b>Nvidia 自己揭露了循環的每一條腿</b>（連續三份文件原文）：「我們估計一家 AI 研究與部署公司透過向我們的客戶購買雲服務、間接貢獻了可觀的營收」——同時單季 $18.6B 現金（=OCF 37%）買私人 AI 股權、$15.9B 股權利得入損益、前三大匿名客戶佔營收 54%/應收 64%（單一客戶欠 ~$12B）。每條腿都揭露了，圈從來不畫。</li>
+<li><b>Amazon 把循環寫進合約設計</b>（10-Q Note 2 原文）：至 $20B 的 Anthropic 融資額度，可用額度隨「Amazon 交付算力里程碑」解鎖——自己交貨解鎖自己放貸，租金再流回 AWS；同季認列 $15.6B 其他收益（$12.3B 是 Anthropic 特別股 Level 3 模型增值）≈ 營業利益 65%。</li>
+<li><b>Alphabet 的 $40B 以「股權衍生品」入帳、對手不具名</b>；同時把 TPU 賣給 Apollo/Blackstone SPV 收現。並另開一條暗線：資料中心信用衍生品一季 $16.9B→$28.4B + $33.3B backstop 框架——公開市場看不到的 neocloud 債務保險。</li>
+<li><b>AMD 權證解鎖條款含「透過授權第三方間接採購」</b>：同一筆 GPU 訂單在中介商記營收、在 AMD 記營收、又解鎖客戶的 AMD 股權。</li>
+<li><b>紙上利得正在變成獲利支柱</b>：Amazon $15.6B（65% 營業利益）、Microsoft $5.9B（一次性稀釋利得）、Nvidia $15.9B/季——三家合計單季 ~$37B 的 AI 相關非現金利得進了財報，而標的多為彼此（Level 3，無市價、可反轉）。</li>
+</ul>
+
+<h2>6. 結論：美國經濟最薄弱的一步 <span class="en">Conclusion: the weakest step in the US economy</span></h2>
+<p>不是某一間公司，而是一個<b>結構性位置</b>：</p>
+<div class="box warn">
+<p><b>GPU 抵押私募信貸層</b>——在這裡，(a) 最短壽命的資產（晶片）被用最長的折舊假設記帳，(b) 最弱的信用（垃圾級 neocloud 與其垃圾級匿名客戶）被包裝進「投資級」結構，(c) 號稱隔離的 SPV 其實帶母公司全額擔保，(d) 而出資人是流動性最差、最不能承受減記的退休金與保險浮存金。</p>
+<p>單一公司答案：<b>CoreWeave</b>。系統性答案：<b>當 OpenAI 的 $1.4T 承諾被迫重新談判的那一天，這一層會把私人虧損變成公共退休金的虧損</b>——而且因為 DDTL 5.0 開創了 GPU 債的公開二級交易，這次的減記會有即時市價，藏不住。</p>
+<p class="en-note">Not a company but a structural position: the GPU-collateralized private credit layer, where the shortest-lived assets carry the longest depreciation schedules, the weakest credits wear investment-grade wrappers, the "isolated" SPVs carry full parent guarantees, and the capital belongs to pensions and insurance floats. Single-name answer: CoreWeave. Systemic answer: the day OpenAI's $1.4T commitment stack gets renegotiated, this layer converts private losses into public retirement losses — at a now-publicly-traded mark.</p>
+</div>
+
+<h2>7. 已知的未知 <span class="en">Known unknowns</span></h2>
+<ul>
+<li><b>已解答（2026-06-06）</b>：CoreWeave DDTL 5.0 的兩家「大型非投資級客戶」＝ <b>OpenAI 與 Cohere</b>（Bloomberg 銀團報導 + PitchBook LCD 兩個獨立來源；8-K 本身仍未具名，故為 reported 級）。Anthropic 不在其中（其 CoreWeave 合約為另一獨立協議）。意涵：(a) OpenAI 在 CoreWeave 資本結構中<b>第二度</b>成為抵押信用；(b) Cohere（ARR $240M、歷史募資僅 $1.54B、獲利目標 2029）是全結構中最弱的抵押信用；(c) DDTL 4.0 抵押藍籌 Meta 拿 A3、DDTL 5.0 抵押 AI 實驗室拿 Ba2/BB+——225bps 價差就是市場給實驗室信用的標價。<br>
+<b>追加（信貸協議 ex10.1 法證, 2026-06-06）</b>：兩份 MSA 在協議中<b>交叉抵押、無分層、無拆分比例</b>——單一放貸公式（71.42%×capex，隱含總建置 ~$4.34B）；任一 MSA 重大違約觸發<b>全設施 Cash Trap</b>；任一 MSA 全面終止構成<b>整個 $3.1B 的違約事件</b>。亦即最弱的信用（Cohere）在合約上持有與 OpenAI 同等的引爆權。客戶名稱與金額上限以 [*] 刪節（全文 101 處）、schedule 未附——這檔債可以公開交易，但公開投資人看不到抵押池的組成</li>
+<li>Apollo/Blackstone TPU SPV 是否已 close；<b>Broadcom 殘值擔保已完成全市場驗證（2026-06-05）：不在任何 SEC 申報者的任何文件裡，也不可能藏在子公司</b>——Broadcom 全體系只有一個 SEC 申報主體（Avago/VMware/CA 併購後全部停止獨立申報），ASC 460 下任何合併子公司簽發的擔保都必須出現在 Broadcom Inc. 合併報表；EDGAR 全文搜尋 "residual value"+"TPU"、"residual value guarantee"+"Anthropic" 全為無關命中；Blackstone/Apollo/Athene/Blue Owl 系所有申報亦無。Broadcom 自己的 4/6 8-K 揭露了商業框架（Anthropic 自 2027 透過 Broadcom 取得 ~3.5GW、「取決於 Anthropic 持續商業成功」、融資夥伴「洽談中」）但無 RVG 字樣——結論：<b>擔保截至 6/5 只存在於媒體報導，因為交易未成交、依 ASC 460 尚無認列義務</b>；成交後 Q2 FY26 10-Q（~6 月中）或 8-K 必須現形，屆時若仍無揭露才是真正的紅旗</li>
+<li>Nvidia 前三大匿名客戶（21%/17%/16% 營收；單一客戶欠 ~$12B 應收）對應到誰；$42.3B 非上市投組中 OpenAI/Anthropic/neocloud 各佔多少</li>
+<li>Stargate JV 的股權比例與 $500B 中實際已部署的資本——五輪深研皆無法驗證，<b>不透明本身就是發現</b></li>
+<li>Apollo/Athene 關聯方資產占比、Blackstone GP 槓桿、Blue Owl 數位基建 AUM——Q1'26 10-Q 已抓到但驗證未存活，列為未研究而非陰性</li>
+<li>Alphabet $28.4B 資料中心信用衍生品與 4 月 $15.3B backstop 的對手是誰（TeraWulf/Cipher 類 neocloud？）</li>
+<li>SoftBank OpenAI 持股在 NAV 中的確切標記（官方 SOTP 不單列）</li>
+<li>Burry Part IV 尚未發表——他承諾的完整傳染機制解釋仍是預告狀態</li>
+</ul>
+
+<h2>8. 主要資料來源 <span class="en">Key sources</span></h2>
+<ul class="src-list">
+<li id="s-senate">參議院 FSOC 信函 (2026-01-22): banking.senate.gov — Warren 等致函要求調查 AI 債務泡沫；CoreWeave $14B+、Hyperion SPV、NY/PA 退休金</li>
+<li id="s-fsb">FSB, Report on Vulnerabilities in Private Credit (2026-05-06): fsb.org/uploads/P060526.pdf — ~31% 退休金 LP、~10% 壽險、~$220B 銀行授信、Box 4 AI 資料中心融資</li>
+<li>BIS Bulletin No.120 (2026-01-07) + Quarterly Review (2026-03): bis.org — AI 私募信貸 $200B+、利差未反映風險 (6.2 vs 6.1pp)、表外槓桿警告</li>
+<li>CoreWeave SEC：10-K FY2025 (crwv-20251231) + 10-Q Q1'26 (crwv-20260331)——債務明細表/到期牆/客戶集中度/RPO/表外租約逐行核對；8-K：DDTL 4.0 (2026-03)、DDTL 5.0 (2026-05 含母公司擔保條款)、Nvidia 回購 (crwv-20250909)；DDTL 4.0 投資人簡報（102% LTC 條款）</li>
+<li>五大巨頭 Q1'26 10-Q（全部逐字驗證）：meta-20260331（$182.9B 表外租約、$28B RVG 零認列、$45.99B 最大曝險）、amzn-20260331（債 $68.8B→$122.6B、TTM FCF $1.2B、Anthropic $20B 里程碑額度、$15.6B Level 3 利得）、goog-20260331（$40.7B VIE 承諾、$28.4B 信用衍生品）、msft-20260331（$196.6B 未開始租約、OpenAI 27%/$11.8B 已注資/$5.9B 稀釋利得）；Oracle Q3 FY26 8-K（RPO $553B、TTM FCF -$24.7B）</li>
+<li>Nvidia：10-K FY2026 (nvda-20260125) + 10-Q Q1 FY27 (nvda-20260426) + 10-Q Q3 FY26 (nvda-20251026)——投資組合 rollforward、$119B 供應承諾、$30B 雲服務協議、$3.5B 租約擔保、客戶集中度、「AI 研究與部署公司」間接營收揭露；AMD 10-Q (amd-20260328) 雙權證；Broadcom Q2 FY26 8-K + Q1 10-Q（RVG 零揭露之負面發現）；Talen 10-Q (tln-20260331)；SoftBank 官方 SOTP（NAV/LTV）</li>
+<li>Microsoft 8-K (msft-ex99_2): OpenAI $250B Azure 承諾、27%/$135B 持股；AMD 8-K (d28189d8k): 1GW 約束力 + 160M 股權證；Amazon 8-K: Anthropic $5B+$20B；Talen 8-K: 1,920MW PPA</li>
+<li>Anthropic 一手新聞稿 (2026-02-12): $30B Series G @ $380B；Crusoe 一手新聞稿 (2025-05-21): $15B Abilene JV</li>
+<li>Bloomberg (2026-05-28, 2026-06-02): Apollo $36B Anthropic TPU 交易與 Broadcom RVG；PitchBook / Private Equity Wire 定價細節</li>
+<li id="s-moodys">Moody's via Fortune (2026-02-25): $662B 表外未開始租約 = 調整後債務 113%；Meta $28B RVG</li>
+<li>HSBC Global Research via Investing.com/Fortune/The Register (2025-11-26): OpenAI $1.4T 成本模型、$207B 缺口</li>
+<li>CNBC (2025-11-14): Burry 折舊論 $176B；TechCrunch (2026-03-04): Nvidia 撤退（$100B→$30B）</li>
+<li>TNW (2026-04-23): SoftBank $10B 保證金貸款、$64.6B 承諾、資產出售清單</li>
+<li id="s-gpu">Hashrate Index: 二手 A100/H100 殘值與租金數據；Bisnow: QTS $3.46B CMBS、DC ABS/CMBS $13.4B H1'25</li>
+<li>Michael Burry, michaeljburry.substack.com: "Short Thoughts" (2026-05-29) 及 "Heretic's Guide to AI's Stars" 系列</li>
+</ul>
+
+<p class="small" style="margin-top:36px">方法說明：claims 經 3 名獨立驗證代理對抗式投票（需 2/3 否決才剔除）；被否決而<b>排除</b>的主張包括「OpenAI 將支出承諾從 $1.4T 砍至 $600B」（1-2，無可驗證的撤回紀錄）與「Anthropic 與 Google/Broadcom 的 5GW 框架」（0-3）。所有金額單位為美元、時間戳於各表注明。本報告非投資建議。<br>
+<span class="en-note">Method: adversarial 3-vote verification per claim (2/3 refutes to kill). Notably refuted and excluded: "OpenAI cut commitments to $600B" (1-2) and the "5GW Google/Broadcom framing" (0-3). Not investment advice.</span></p>
+
+</div>
+</body>
+</html>

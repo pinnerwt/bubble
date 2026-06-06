@@ -26,11 +26,13 @@
 - Cohere：總募資 ~$1.54B、估值 $7B、獲利目標 2029、投資人含 Nvidia/AMD/PSP（加拿大退休金）
 - 慣例：Cohere 投資人備忘錄每年 ~2 月經 CNBC/BetaKit 流出（ARR 更新的主要管道）
 
-## 額外標記來源（2026-06-06 試跑發現）
+## 額外標記來源
 
-- **Monroe Capital Income Plus Corp（CIK 1742313）與 Monroe Capital Enhanced Corporate Lending Fund（CIK 2061670）**
-  的 10-Q 提及 Cohere——BDC 投資明細表若載有 Cohere＝疑似創投債部位，其公允價值與成本欄位是
-  另一個季度級獨立標記；venture debt 出現本身也代表 Cohere 已在用債務融資（補充燒錢）。首查時確認部位性質。
+- ~~Monroe Capital BDC~~ **誤報（2026-06-06 首查確認）**：Monroe 持倉是「Cohere Beauty, Phoenix LLC」
+  ——化妝品公司（fka Arizona Natural Resources），與 Cohere Technologies 無關。掃描腳本第 1 區塊
+  的全市場命中需人工過濾「Cohere Beauty」。
+- **PSF 每股標記基準**：Cohere Technologies Series D-1/D-2 均為 **$7.39/股**（NPORT-P 2026-05-27，
+  持倉合計 ~$4.92M）。後續檢查直接比每股價。
 
 ## 關鍵連結
 
@@ -43,3 +45,9 @@
 ## 檢查紀錄
 
 - 2026-06-06：基線建立。全部 🟢（無新申報異常）。
+- 2026-06-06（首次完整檢查）：**重大正面事件——Cohere 與 Aleph Alpha 宣布合併**（合併估值 ~$20B、
+  Cohere 股東 ~90%、Schwarz Group $600M 入 Series E 預計 2026 下半 close、德國政府擬成錨定客戶；
+  TFN 引 CNBC，公告日期 4/24 或 6/1 兩說待確認）。募資時鐘重置 🟢。PSF 標記 $7.39/股（基線）。
+  CRWV 5yr CDS ~665bps（vs 基線 640，微寬，<800 門檻內）；隱含 5 年違約機率 ~42%（市場推算）。
+  DDTL 5.0 無公開報價可查，以 CDS 代理。Monroe 線索確認為誤報（Cohere Beauty 化妝品公司）。
+  總評 🟢。下次：merger/Series E close 時、CoreWeave Q2 10-Q（~2026-08）、或 2026-09 例行。

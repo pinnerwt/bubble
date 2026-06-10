@@ -21,6 +21,7 @@ const DATA_ANTHROPIC = {
     "category": "spv",
     "health": {
       "score": 35,
+      "updateZh": "2026-06-06 更新：銀團報導確認 RVG 機制——租金違約達一定期間→SPV 賣晶片償債、缺口由 Broadcom 100% 補足 A1+A2（$31B）；B 段 $4.5B 無任何保護；訂單本週截止、最快下週 close",
       "notesZh": "~$36B（Burry 5/29 文中 $38B）：$6B A1 + $25B A2(~5.75%) + $4.5B B；6/5 仍在銷售未 close；B 段為無增強損失層；Broadcom RVG 承接 senior 尾部風險",
       "notesEn": "~$36B (Burry's '$38B'): $6B A1 + $25B A2 (~5.75%) + $4.5B B; not closed as of Jun 5; B tranche is the unenhanced loss piece; Broadcom RVG absorbs senior tail"
     }

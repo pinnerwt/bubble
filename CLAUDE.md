@@ -13,8 +13,8 @@
 | `data/cohere.js` | Cohere — `/cohere-risk-check` 主檔 |
 | `data/openai.js` | OpenAI + Stargate — `/openai-risk-check` 主檔 |
 | `data/softbank.js` | SoftBank — `/softbank-risk-check` 主檔 |
-| `data/anthropic.js` | Anthropic + TPU SPV |
-| `data/coreweave.js` | CoreWeave + DDTL SPV ×2 |
+| `data/anthropic.js` | Anthropic + TPU SPV — `/anthropic-risk-check` 主檔 |
+| `data/coreweave.js` | CoreWeave + DDTL SPV ×2 — `/coreweave-risk-check` 主檔 |
 | `data/chips.js` | Nvidia / AMD / Broadcom |
 | `data/hyperscalers.js` | MSFT / GOOGL / AMZN / META / ORCL + Beignet |
 | `data/infra.js` | Crusoe / Abilene / QTS / Talen |
@@ -40,7 +40,8 @@ cohere > anthropic > openai > softbank > coreweave > chips > hyperscalers > infr
 
 ## 風險追蹤 skills（.claude/skills/）
 
-`/cohere-risk-check`、`/openai-risk-check`、`/softbank-risk-check`（各帶 EDGAR 掃描腳本 +
-REFERENCE.md 門檻表與檢查紀錄）；`/risk-dashboard` 三合一總覽。
+`/coreweave-risk-check`（含 XBRL 自動數字）、`/cohere-risk-check`、`/openai-risk-check`、
+`/softbank-risk-check`、`/anthropic-risk-check`（各帶掃描腳本 + REFERENCE.md 門檻表與
+檢查紀錄）；`/risk-dashboard` 五合一總覽。
 檢查後：發現寫回對應 REFERENCE.md「檢查紀錄」、重大變化同步 `data/<節點>.js` 健康度。
 EDGAR 請求需帶 User-Agent（腳本內建）。

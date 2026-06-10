@@ -128,8 +128,8 @@ const DATA_HYPERSCALERS = {
     "name": "Oracle",
     "category": "hyperscaler",
     "health": {
-      "score": 40,
-      "updateZh": "2026-06 更新：OpenAI 承諾砍半+棄自建改租賃的重談潮直指其 $300B 合約；分析師預期 MSFT-OpenAI 分潤 90-120 天內重談；Q4 FY26 財報（6/10）的 RPO 轉化＝第一個現形點",
+      "score": 38,
+      "updateZh": "2026-06-06 更新：CDS 創歷史紀錄 ~198bps（4 月, 超越 2008 峰值）、股價 YTD -25%、計畫 2026 再募 $45-50B（債+股）——OpenAI 砍承諾的同時 Oracle 還在加碼；重談潮直指其 $300B 合約；Q4 FY26 財報（6/10）的 RPO 轉化＝第一個現形點",
       "notesZh": "Q3 FY26 (2026-02-28)：RPO $553B（年增 325%）；借款 ~$134.6B vs 現金 $38.5B（3.5 倍）；TTM 自由現金流 -$24.7B（capex $48.3B ≈ OCF 的 2 倍）；CDS 151.3bps 創 2009 以來新高；S&P/Moody's 展望負向。OpenAI 風險進入公開債市的最大管道",
       "notesEn": "Q3 FY26: RPO $553B (+325% YoY); borrowings ~$134.6B vs cash $38.5B; TTM FCF -$24.7B (capex ~2x OCF); CDS highest since 2009; negative outlooks. Largest channel from OpenAI risk into public bond markets"
     },
